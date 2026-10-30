@@ -80,6 +80,7 @@
  <label for="service">Service of Interest</label><select id="service" name="service" required><option value="">Select a service</option><option>Birth Doula Support</option><option>Postpartum Doula Support</option><option>Infant &amp; Toddler Sleep Consulting</option><option>Yoga for Every Body</option></select>
  <label for="message">Message</label><textarea id="message" name="message" rows="5" required maxlength="10000"></textarea>
  <button class="button send" type="submit">Send Message</button>
+ <p id="form-status" class="form-note" role="status" aria-live="polite" aria-atomic="true"></p>
  </form>
 </section>
     </main>
@@ -140,6 +141,50 @@
       }
     });
     showTestimonial(0);
+  </script>
+
+  <script id="contact-form-handler">
+    (() => {
+      const form = document.getElementById('contact-form');
+      const status = document.getElementById('form-status');
+      const button = form.querySelector('button[type="submit"]');
+      let sending = false;
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (sending || !form.reportValidity()) return;
+        sending = true;
+        button.disabled = true;
+        button.textContent = 'Sending…';
+        form.setAttribute('aria-busy', 'true');
+        status.textContent = 'Sending your message…';
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'application/json' },
+            signal: controller.signal,
+            redirect: 'error'
+          });
+          const result = await response.json();
+          if (!response.ok || result.ok !== true) {
+            status.textContent = 'Your submission was not accepted. Please try again, or email mia@mothermother.org using the link above.';
+            return;
+          }
+          form.reset();
+          status.textContent = "Submission successful -- we'll be in touch soon!";
+        } catch (error) {
+          status.textContent = 'We couldn’t confirm your submission. Your details are still here. Please try again, or email mia@mothermother.org using the link above.';
+        } finally {
+          clearTimeout(timeout);
+          sending = false;
+          button.disabled = false;
+          button.textContent = 'Send Message';
+          form.removeAttribute('aria-busy');
+        }
+      });
+    })();
   </script>
 </body>
 </html>

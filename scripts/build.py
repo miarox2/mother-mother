@@ -1,7 +1,6 @@
 """Dependency-free sitemap generation and clean static build. Run: python3 scripts/build.py."""
 from pathlib import Path
 from html.parser import HTMLParser
-from urllib.parse import urlsplit
 import shutil
 import xml.etree.ElementTree as ET
 ROOT=Path(__file__).resolve().parents[1]

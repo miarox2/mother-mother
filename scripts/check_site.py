@@ -47,13 +47,16 @@ def check():
    if u.fragment:assert u.fragment in docs[target].ids,f'broken anchor {url}'
  assert len(set(titles))==len(titles) and len(set(descs))==len(descs)
  urls=[x.text for x in ET.parse(root/'sitemap.xml').findall('.//{*}loc')]
- assert set(urls)==set(canon) and len(urls)==4
+ assert set(urls)==set(canon) and urls==[BASE+'/']
+ assert not any((root/slug).exists() for slug in ('birth-doula','postpartum-doula','sleep-consulting'))
  assert BASE+'/sitemap.xml' in (root/'robots.txt').read_text()
  home=docs[root/'index.html'];forms=[a for t,a in home.tags if t=='form']
  assert forms[0]['action']=='https://formsubmit.co/mia@mothermother.org' and forms[0]['method']=='POST'
  assert home.attr('input','name','_subject','value')==['MOTHERMOTHER.ORG INQUIRY']
  assert home.attr('select','name','service','id')==['service']
+ assert {'birth-doula','postpartum-doula','sleep-consulting','yoga','about','contact'} <= set(home.ids)
+ assert {x['@type'] for x in home.json[0]['@graph']} == {'Organization','WebSite'}
  assert len([a for t,a in home.tags if t=='figure' and a.get('class')=='testimonial'])==10
  assert docs[root/'404.html'].attr('meta','name','robots','content')==['noindex']
- print('PASS: four indexable pages, XML, metadata, JSON-LD syntax, headings, local assets/anchors, contact configuration, 10 original reviews and noindex 404.')
+ print('PASS: one indexable homepage, XML, metadata, JSON-LD syntax, headings, local assets/anchors, contact configuration, 10 original reviews and noindex 404.')
 if __name__=='__main__':check()
